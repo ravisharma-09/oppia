@@ -30,6 +30,7 @@ import {PracticeQuestionReviewer} from '../../utilities/user/practice-question-r
 import {PracticeQuestionSubmitter} from '../../utilities/user/practice-question-submitter';
 import {TopicManager} from '../../utilities/user/topic-manager';
 import {QuestionCoordinator} from '../../utilities/user/practice-question-coordinator';
+import {ReleaseCoordinator} from '../../utilities/user/release-coordinator';
 
 test.describe.configure({mode: 'serial'});
 
@@ -46,6 +47,7 @@ test.describe('Practice Question Reviewer Stats & Badges', function () {
     LoggedInUser;
   let curriculumAdmin: CurriculumAdmin & TopicManager & ExplorationEditor;
   let questionCoordinator: QuestionCoordinator;
+  let releaseCoordinator: ReleaseCoordinator;
 
   test.beforeAll(async function ({browser}) {
     test.setTimeout(900000);
@@ -69,6 +71,15 @@ test.describe('Practice Question Reviewer Stats & Badges', function () {
       browser,
       [testConstants.Roles.QUESTION_COORDINATOR]
     );
+
+    releaseCoordinator = await UserFactory.createNewUser(
+      'releaseCoordinator',
+      'release_coordinator@example.com',
+      browser,
+      [testConstants.Roles.RELEASE_COORDINATOR]
+    );
+
+    await releaseCoordinator.enableFeatureFlag('cd_admin_dashboard_new_ui');
 
     curriculumAdmin = await UserFactory.createNewUser(
       'curriculumAdm',
