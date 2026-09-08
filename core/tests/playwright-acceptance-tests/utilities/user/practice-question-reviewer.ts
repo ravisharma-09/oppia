@@ -25,6 +25,8 @@ const opportunityButtonSelector = '.e2e-test-opportunity-list-item-button';
 const reviewButtonPrefix = 'e2e-test-question-suggestion-review';
 const reviewModalHeaderSelector =
   '.e2e-test-question-suggestion-review-modal-header';
+const reviewModalWindowSelector =
+  'ngb-modal-window:has(.e2e-test-question-suggestion-review-modal-header)';
 
 // Question Suggestion Editor Modal Selectors.
 const questionSuggestionEditorModalSelector =
@@ -41,11 +43,38 @@ const confirmDeleteInteractionButtonSelector =
 
 export class PracticeQuestionReviewer extends Contributor {
   /**
+   * Opens the question editor and waits for the review modal to be removed.
+   */
+  private async openQuestionEditorModal(): Promise<void> {
+    const reviewModal = await this.page.$(reviewModalWindowSelector);
+
+    await this.clickOnElementWithSelector(editButtonSelector);
+
+    // The review and editor modals contain several identical controls. Wait
+    // for the dismissed review modal to detach so that subsequent selectors
+    // cannot resolve to one of its controls during the closing animation.
+    if (reviewModal) {
+      await this.page.waitForFunction(
+        element => !element.isConnected,
+        reviewModal
+      );
+    }
+    await this.expectElementToBeVisible(questionSuggestionEditorModalSelector);
+  }
+
+  /**
    * Removes the interaction from the question being edited.
    */
   private async removeInteraction(): Promise<void> {
-    await this.waitForElementToStabilize(removeInteractionButtonSelector);
-    await this.clickOnElementWithSelector(removeInteractionButtonSelector);
+    const questionEditorModal = await this.getElementInParent(
+      questionSuggestionEditorModalSelector
+    );
+    const removeInteractionButton = await this.getElementInParent(
+      removeInteractionButtonSelector,
+      questionEditorModal
+    );
+
+    await this.clickOnElement(removeInteractionButton);
     await this.clickOnElementWithSelector(
       confirmDeleteInteractionButtonSelector
     );
@@ -60,7 +89,7 @@ export class PracticeQuestionReviewer extends Contributor {
    * @param question The question to check.
    */
   async expectQuestionInReviewModalToBe(question: string): Promise<void> {
-    const rteDisplaySelector = '.e2e-test-rte-display';
+    const rteDisplaySelector = '.e2e-test-state-content-display';
     await this.expectTextContentToBe(rteDisplaySelector, question);
   }
 
@@ -79,14 +108,32 @@ export class PracticeQuestionReviewer extends Contributor {
    * @param {string} question - The question to edit.
    */
   async editQuestionInQuestionEditorModal(question: string): Promise<void> {
-    await this.clickOnElementWithSelector(editQuestionPencilIconSelector);
+    const questionEditorModal = await this.getElementInParent(
+      questionSuggestionEditorModalSelector
+    );
+    const editQuestionButton = await this.getElementInParent(
+      editQuestionPencilIconSelector,
+      questionEditorModal
+    );
 
-    await this.expectElementToBeVisible(questionSuggestionEditorModalSelector);
+    await this.clickOnElement(editQuestionButton);
 
-    await this.clearAllTextFrom(stateContentInputField);
-    await this.typeInInputField(stateContentInputField, `${question}`);
-    await this.clickOnElementWithSelector(saveContentButton);
-    await this.expectElementToBeVisible(stateContentInputField, false);
+    const contentInput = await this.getElementInParent(
+      stateContentInputField,
+      questionEditorModal
+    );
+    await contentInput.press('Control+A');
+    await contentInput.press('Backspace');
+    await this.typeInInputField(contentInput, question);
+
+    const saveContentButtonElement = await this.getElementInParent(
+      saveContentButton,
+      questionEditorModal
+    );
+    await this.clickOnElement(saveContentButtonElement);
+    await questionEditorModal.waitForSelector(stateContentInputField, {
+      state: 'hidden',
+    });
   }
 
   /**
@@ -94,10 +141,7 @@ export class PracticeQuestionReviewer extends Contributor {
    * @param {string} question - The question to edit.
    */
   async editQuestionInReview(question: string): Promise<void> {
-    // Click on edit button.
-    await this.clickOnElementWithSelector(editButtonSelector);
-
-    await this.expectElementToBeVisible(questionSuggestionEditorModalSelector);
+    await this.openQuestionEditorModal();
 
     // Update the question.
     await this.editQuestionInQuestionEditorModal(question);
@@ -112,9 +156,8 @@ export class PracticeQuestionReviewer extends Contributor {
    * Edits the question interaction in the review.
    */
   async editQuestionInteractionInReview(): Promise<void> {
-    // Click on edit button.
     await this.expectElementToBeVisible(editButtonSelector);
-    await this.clickOnElementWithSelector(editButtonSelector);
+    await this.openQuestionEditorModal();
 
     await this.removeInteraction();
 
