@@ -26,8 +26,18 @@ const uncheckedCheckboxSelector = '.e2e-test-checkbox-unchecked';
 const saveButtonSelector = '.e2e-test-save-button';
 
 const totalQuestionReviewersSelector = '.e2e-test-total-question-reviewers';
+const questionCoordinatorTabSelector =
+  '.e2e-test-question-coordinators-tab';
 
 export class QuestionCoordinator extends BaseUser {
+  /**
+   * Navigates to the Question Coordinators tab in the contributor admin page.
+   */
+  async navigateToQuestionCoordinatorTab(): Promise<void> {
+    await this.expectElementToBeVisible(questionCoordinatorTabSelector);
+    await this.clickOnElementWithSelector(questionCoordinatorTabSelector);
+  }
+
   /**
    * Clicks on the add reviewer or submitter button.
    * @param right - The right to add or remove.
