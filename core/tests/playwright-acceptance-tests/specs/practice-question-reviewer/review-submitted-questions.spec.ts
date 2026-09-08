@@ -23,6 +23,7 @@ import {test} from '@playwright/test';
 import testConstants from '../../utilities/common/test-constants';
 import {UserFactory} from '../../utilities/common/user-factory';
 import {Contributor} from '../../utilities/user/contributor';
+import {ContributorAdmin} from '../../utilities/user/contributor-admin';
 import {CurriculumAdmin} from '../../utilities/user/curriculum-admin';
 import {ExplorationEditor} from '../../utilities/user/exploration-editor';
 import {LoggedInUser} from '../../utilities/user/logged-in-user';
@@ -31,7 +32,6 @@ import {PracticeQuestionSubmitter} from '../../utilities/user/practice-question-
 import {TopicManager} from '../../utilities/user/topic-manager';
 import {QuestionCoordinator} from '../../utilities/user/practice-question-coordinator';
 import {ReleaseCoordinator} from '../../utilities/user/release-coordinator';
-import {ContributorAdmin} from '../../utilities/user/contributor-admin';
 
 test.describe.configure({mode: 'serial'});
 
@@ -131,10 +131,6 @@ test.describe('Practice Question Reviewer', function () {
       'the-broken-calculator',
       'Arithmetic Operations'
     );
-    await curriculumAdmin.openStoryEditor(
-      'The Broken Calculator',
-      'Arithmetic Operations'
-    );
     await curriculumAdmin.addChapter(
       'Addition without a calculator',
       explorationId1
@@ -226,7 +222,7 @@ test.describe('Practice Question Reviewer', function () {
     await questionReviewer.submitReview('accept', 'Test Review Message');
 
     // Checks if questions are visible in question skill editor.
-    await curriculumAdmin.navigateToTopicAndSkillsDashboardPage();
+    await curriculumAdmin.navigateToTopicsAndSkillsDashboardPageAsTopicManager();
     await curriculumAdmin.openSkillEditor('Addition');
     await curriculumAdmin.navigateToSkillQuestionEditorTab();
     await curriculumAdmin.expectQuestionToBePresent('Updated Question');

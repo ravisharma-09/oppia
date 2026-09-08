@@ -71,10 +71,8 @@ export class ContributorAdmin extends BaseUser {
     if (this.isViewportAtMobileWidth()) {
       const modifiedName = tabName.replace(/s$/, '');
       await this.expectElementToBeVisible(tabSelectionDropdownMobileSelector);
-      await this.updateMatOption(
-        tabSelectionDropdownMobileSelector,
-        modifiedName
-      );
+      await this.clickOnElementWithSelector(tabSelectionDropdownMobileSelector);
+      await this.selectMatOption(modifiedName);
     } else {
       const tabNameInLowerCase = tabName.toLocaleLowerCase().replace(' ', '-');
       const tabSelector = `.e2e-test-${tabNameInLowerCase}-tab`;

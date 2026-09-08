@@ -35,8 +35,26 @@ const saveQuestionButtonSelector = '.e2e-test-save-question-button';
 const editButtonSelector = `.${reviewButtonPrefix}-edit-button`;
 const stateContentInputField = 'div.e2e-test-rte';
 const saveContentButton = 'button.e2e-test-save-state-content';
+const removeInteractionButtonSelector = '.e2e-test-delete-interaction';
+const confirmDeleteInteractionButtonSelector =
+  '.e2e-test-confirm-delete-interaction';
 
 export class PracticeQuestionReviewer extends Contributor {
+  /**
+   * Removes the interaction from the question being edited.
+   */
+  private async removeInteraction(): Promise<void> {
+    await this.waitForElementToStabilize(removeInteractionButtonSelector);
+    await this.clickOnElementWithSelector(removeInteractionButtonSelector);
+    await this.clickOnElementWithSelector(
+      confirmDeleteInteractionButtonSelector
+    );
+    await this.expectElementToBeVisible(
+      confirmDeleteInteractionButtonSelector,
+      false
+    );
+  }
+
   /**
    * Checks that the question in the review modal is the same as the one passed in.
    * @param question The question to check.
