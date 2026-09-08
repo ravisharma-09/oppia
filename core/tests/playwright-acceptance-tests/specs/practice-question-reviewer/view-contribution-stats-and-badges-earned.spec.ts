@@ -31,6 +31,7 @@ import {PracticeQuestionSubmitter} from '../../utilities/user/practice-question-
 import {TopicManager} from '../../utilities/user/topic-manager';
 import {QuestionCoordinator} from '../../utilities/user/practice-question-coordinator';
 import {ReleaseCoordinator} from '../../utilities/user/release-coordinator';
+import {ContributorAdmin} from '../../utilities/user/contributor-admin';
 
 test.describe.configure({mode: 'serial'});
 
@@ -46,7 +47,7 @@ test.describe('Practice Question Reviewer Stats & Badges', function () {
     ExplorationEditor &
     LoggedInUser;
   let curriculumAdmin: CurriculumAdmin & TopicManager & ExplorationEditor;
-  let questionCoordinator: QuestionCoordinator;
+  let questionCoordinator: QuestionCoordinator & ContributorAdmin;
   let releaseCoordinator: ReleaseCoordinator;
 
   test.beforeAll(async function ({browser}) {
@@ -90,7 +91,9 @@ test.describe('Practice Question Reviewer Stats & Badges', function () {
 
     // Add submit question rights to the question submitter.
     await questionCoordinator.navigateToContributorDashboardAdminPage();
-    await questionCoordinator.navigateToQuestionCoordinatorTab();
+    await questionCoordinator.switchToTabInContributorAdminPage(
+      'Question Submitters'
+    );
     await questionCoordinator.clickOnAddReviewerOrSubmitterButton();
     await questionCoordinator.addUsernameInUsernameInputModal(
       questionSubmitter.username ?? ''
@@ -100,6 +103,9 @@ test.describe('Practice Question Reviewer Stats & Badges', function () {
     );
     await questionCoordinator.saveAndCloseQuestionRoleEditorModal();
 
+    await questionCoordinator.switchToTabInContributorAdminPage(
+      'Question Reviewers'
+    );
     await questionCoordinator.clickOnAddReviewerOrSubmitterButton();
     await questionCoordinator.addUsernameInUsernameInputModal(
       questionReviewer.username ?? ''
