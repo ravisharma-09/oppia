@@ -29,9 +29,8 @@ import {ExplorationEditor} from '../../utilities/user/exploration-editor';
 import {LoggedInUser} from '../../utilities/user/logged-in-user';
 import {PracticeQuestionReviewer} from '../../utilities/user/practice-question-reviewer';
 import {PracticeQuestionSubmitter} from '../../utilities/user/practice-question-submitter';
+import {QuestionAdmin} from '../../utilities/user/question-admin';
 import {TopicManager} from '../../utilities/user/topic-manager';
-import {QuestionCoordinator} from '../../utilities/user/practice-question-coordinator';
-import {ReleaseCoordinator} from '../../utilities/user/release-coordinator';
 
 test.describe.configure({mode: 'serial'});
 
@@ -42,8 +41,7 @@ test.describe('Practice Question Reviewer Stats & Badges', function () {
     ExplorationEditor &
     LoggedInUser;
   let curriculumAdmin: CurriculumAdmin & TopicManager & ExplorationEditor;
-  let questionCoordinator: QuestionCoordinator & ContributorAdmin;
-  let releaseCoordinator: ReleaseCoordinator;
+  let questionAdmin: QuestionAdmin & ContributorAdmin;
 
   test.beforeAll(async function ({browser}) {
     test.setTimeout(900000);
@@ -61,21 +59,12 @@ test.describe('Practice Question Reviewer Stats & Badges', function () {
       browser
     );
 
-    questionCoordinator = await UserFactory.createNewUser(
-      'questionCoordinator',
-      'question_coordinator@example.com',
+    questionAdmin = await UserFactory.createNewUser(
+      'questionAdm',
+      'question_admin@example.com',
       browser,
-      [testConstants.Roles.QUESTION_COORDINATOR]
+      [testConstants.Roles.QUESTION_ADMIN]
     );
-
-    releaseCoordinator = await UserFactory.createNewUser(
-      'releaseCoordinator',
-      'release_coordinator@example.com',
-      browser,
-      [testConstants.Roles.RELEASE_COORDINATOR]
-    );
-
-    await releaseCoordinator.enableFeatureFlag('cd_admin_dashboard_new_ui');
 
     curriculumAdmin = await UserFactory.createNewUser(
       'curriculumAdm',
@@ -85,30 +74,13 @@ test.describe('Practice Question Reviewer Stats & Badges', function () {
     );
 
     // Add submit question rights to the question submitter.
-    await questionCoordinator.navigateToContributorDashboardAdminPage();
-    await questionCoordinator.switchToTabInContributorAdminPage(
-      'Question Submitters'
-    );
-    await questionCoordinator.clickOnAddReviewerOrSubmitterButton();
-    await questionCoordinator.addUsernameInUsernameInputModal(
+    await questionAdmin.navigateToContributorDashboardAdminPage();
+    await questionAdmin.addSubmitQuestionRights(
       questionSubmitter.username ?? ''
     );
-    await questionCoordinator.addOrRemoveQuestionRightsInQuestionRoleEditorModal(
-      'Submitter'
-    );
-    await questionCoordinator.saveAndCloseQuestionRoleEditorModal();
-
-    await questionCoordinator.switchToTabInContributorAdminPage(
-      'Question Reviewers'
-    );
-    await questionCoordinator.clickOnAddReviewerOrSubmitterButton();
-    await questionCoordinator.addUsernameInUsernameInputModal(
+    await questionAdmin.addReviewQuestionRights(
       questionReviewer.username ?? ''
     );
-    await questionCoordinator.addOrRemoveQuestionRightsInQuestionRoleEditorModal(
-      'Reviewer'
-    );
-    await questionCoordinator.saveAndCloseQuestionRoleEditorModal();
 
     // Create a topic and add story with a chapter.
     const explorationId1 =
