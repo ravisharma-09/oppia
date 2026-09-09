@@ -48,9 +48,19 @@ export class ContributorAdmin extends BaseUser {
     // The dashboard continuously refreshes contributor statistics, so waiting
     // for global network-idle can hang indefinitely. Its page container is a
     // reliable readiness signal for both dashboard implementations.
-    await this.page.goto(ContributorDashboardAdminUrl, {
-      waitUntil: 'commit',
-    });
+    try {
+      await this.page.goto(ContributorDashboardAdminUrl, {
+        waitUntil: 'commit',
+        timeout: 5000,
+      });
+    } catch {
+      // On mobile, the dashboard can begin polling before Playwright resolves
+      // the navigation. Continue only if the requested URL has committed; the
+      // page-container checks below still verify that the page is ready.
+      if (!this.page.url().includes(ContributorDashboardAdminUrl)) {
+        throw new Error('Failed to navigate to the contributor admin page.');
+      }
+    }
     expect(this.page.url()).toContain(ContributorDashboardAdminUrl);
     const newDashVisible = await this.isElementVisible(
       newContributorAdminDashboardPageSelector
