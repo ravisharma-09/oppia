@@ -51,8 +51,9 @@ export class ContributorAdmin extends BaseUser {
     await this.page.goto(ContributorDashboardAdminUrl, {
       waitUntil: 'commit',
     });
-    await this.page.waitForURL(currentURL =>
-      currentURL.href.includes(ContributorDashboardAdminUrl)
+    await this.page.waitForURL(
+      currentURL => currentURL.href.includes(ContributorDashboardAdminUrl),
+      {waitUntil: 'commit'}
     );
     const newDashVisible = await this.isElementVisible(
       newContributorAdminDashboardPageSelector
