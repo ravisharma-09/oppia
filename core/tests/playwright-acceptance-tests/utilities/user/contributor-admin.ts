@@ -49,7 +49,7 @@ export class ContributorAdmin extends BaseUser {
     // for global network-idle can hang indefinitely. Its page container is a
     // reliable readiness signal for both dashboard implementations.
     await this.page.goto(ContributorDashboardAdminUrl, {
-      waitUntil: 'domcontentloaded',
+      waitUntil: 'commit',
     });
     await this.page.waitForURL(currentURL =>
       currentURL.href.includes(ContributorDashboardAdminUrl)
