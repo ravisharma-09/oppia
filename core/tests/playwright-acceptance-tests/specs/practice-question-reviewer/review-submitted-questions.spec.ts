@@ -196,4 +196,9 @@ test.describe('Practice Question Reviewer', function () {
     await curriculumAdmin.expectQuestionToBePresent('What is 231 + 12?');
     await curriculumAdmin.expectQuestionToBePresent('What is 2 + 3?', false);
   });
+
+  test.afterAll(async () => {
+    // Close user contexts explicitly so that video recordings are finalized.
+    await UserFactory.closeAllBrowsers();
+  });
 });

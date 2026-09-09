@@ -195,4 +195,9 @@ test.describe('Practice Question Reviewer Stats & Badges', function () {
     await questionReviewer.expectBadgesToContain('1', 'Review');
     await questionReviewer.expectBadgesToContain('1', 'Correction');
   });
+
+  test.afterAll(async () => {
+    // Close user contexts explicitly so that video recordings are finalized.
+    await UserFactory.closeAllBrowsers();
+  });
 });
