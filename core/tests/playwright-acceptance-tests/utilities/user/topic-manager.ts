@@ -976,7 +976,10 @@ export class TopicManager extends BaseUser {
     difficulty: 'Easy' | 'Medium' | 'Hard',
     explanation: string
   ): Promise<void> {
-    if (this.isViewportAtMobileWidth()) {
+    if (
+      this.isViewportAtMobileWidth() &&
+      !(await this.page.locator(selectRubricDifficultySelector).isVisible())
+    ) {
       await this.clickOnElementWithSelector(toggleSkillRubricsDropdown);
     }
 
