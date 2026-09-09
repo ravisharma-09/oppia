@@ -45,7 +45,15 @@ export class ContributorAdmin extends BaseUser {
    * Function for navigating to the contributor dashboard admin page.
    */
   async navigateToContributorDashboardAdminPage(): Promise<void> {
-    await this.goto(ContributorDashboardAdminUrl);
+    // The dashboard continuously refreshes contributor statistics, so waiting
+    // for global network-idle can hang indefinitely. Its page container is a
+    // reliable readiness signal for both dashboard implementations.
+    await this.page.goto(ContributorDashboardAdminUrl, {
+      waitUntil: 'domcontentloaded',
+    });
+    await this.page.waitForURL(currentURL =>
+      currentURL.href.includes(ContributorDashboardAdminUrl)
+    );
     const newDashVisible = await this.isElementVisible(
       newContributorAdminDashboardPageSelector
     );
