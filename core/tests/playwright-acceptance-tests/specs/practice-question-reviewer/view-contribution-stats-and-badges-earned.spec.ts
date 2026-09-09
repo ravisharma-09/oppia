@@ -36,11 +36,6 @@ import {ReleaseCoordinator} from '../../utilities/user/release-coordinator';
 test.describe.configure({mode: 'serial'});
 
 test.describe('Practice Question Reviewer Stats & Badges', function () {
-  test.skip(
-    () => process.env.MOBILE === 'true',
-    'Test skipped in mobile viewport'
-  );
-
   let questionReviewer: PracticeQuestionReviewer & LoggedInUser;
   let questionSubmitter: PracticeQuestionSubmitter &
     Contributor &
