@@ -49,7 +49,6 @@ import {
   PracticeQuestionReviewer,
   PracticeQuestionReviewerFactory,
 } from '../user/practice-question-reviewer';
-import {QuestionCoordinatorFactory} from '../user/practice-question-coordinator';
 import {QuestionAdminFactory} from '../user/question-admin';
 
 const ROLES = testConstants.Roles;
@@ -65,7 +64,6 @@ const VIDEO_RECORDING_DIR = `../oppia_full_stack_test_video_recordings/acceptanc
 const USER_ROLE_MAPPING = {
   [ROLES.CURRICULUM_ADMIN]: CurriculumAdminFactory,
   [ROLES.QUESTION_ADMIN]: QuestionAdminFactory,
-  [ROLES.QUESTION_COORDINATOR]: QuestionCoordinatorFactory,
   [ROLES.RELEASE_COORDINATOR]: ReleaseCoordinatorFactory,
   [ROLES.TOPIC_MANAGER]: TopicManagerFactory,
   [ROLES.VOICEOVER_ADMIN]: VoiceoverAdminFactory,
