@@ -111,12 +111,3 @@ jobs:
           viewport-type: ${{ matrix.viewport-type }}
           enable-screen-recording: true
           modified-suite-name-for-uploads: ${{ steps.generate_suite_name_for_artifacts.outputs.MODIFIED_SUITE_NAME }}
-      # Keep one successful sample per viewport as migration review evidence.
-      # Failure artifacts for every run are uploaded by the action above.
-      - name: Upload successful sample recordings
-        if: ${{ success() && matrix.run == '1' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: successful-recordings_${{ steps.generate_suite_name_for_artifacts.outputs.MODIFIED_SUITE_NAME }}
-          path: /home/runner/work/oppia/oppia_full_stack_test_video_recordings/acceptance/${{ matrix.viewport-type }}-*
-          if-no-files-found: error
