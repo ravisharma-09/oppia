@@ -1176,26 +1176,40 @@ export class ExplorationEditor extends BaseUser {
    * Navigate to the preview tab.
    */
   async navigateToPreviewTab(): Promise<void> {
-    if (this.isViewportAtMobileWidth()) {
-      await this.waitForPageToFullyLoad();
-      if (!(await this.isElementVisible(mobileNavbarOptions))) {
-        await this.clickOnElementWithSelector(mobileOptionsButtonSelector);
+    const previewUrl = (url: URL): boolean => url.href.includes('#/preview/');
+    let previewTabReached = previewUrl(new URL(this.page.url()));
+
+    // Under load, the fixed mobile navigation bar can accept the click without
+    // switching tabs. Retry the navigation with a bounded wait so that a
+    // transient click race does not consume the complete test timeout.
+    for (let attempt = 0; attempt < 3 && !previewTabReached; attempt++) {
+      if (this.isViewportAtMobileWidth()) {
+        await this.waitForPageToFullyLoad();
+        if (!(await this.isElementVisible(mobileNavbarOptions))) {
+          await this.clickOnElementWithSelector(mobileOptionsButtonSelector);
+        }
+
+        if (!(await this.isElementVisible(`${mobileNavbarPane}.show`))) {
+          await this.clickOnElementWithSelector(mobileNavbarDropdown, {
+            force: true,
+          });
+        }
+        await this.expectElementToBeVisible(`${mobileNavbarPane}.show`);
+        await this.clickOnElementWithSelector(mobilePreviewTabButton);
+      } else {
+        await this.clickOnElementWithSelector(previewTabButton);
       }
 
-      if (!(await this.isElementVisible(`${mobileNavbarPane}.show`))) {
-        // The fixed mobile navigation bar can be overlapped by the editor
-        // content while the tab transition is settling.
-        await this.clickOnElementWithSelector(mobileNavbarDropdown, {
-          force: true,
-        });
+      try {
+        await this.page.waitForURL(previewUrl, {timeout: 30000});
+        previewTabReached = true;
+      } catch (error) {
+        if (attempt === 2) {
+          throw error;
+        }
       }
-      await this.expectElementToBeVisible(`${mobileNavbarPane}.show`);
-      await this.clickOnElementWithSelector(mobilePreviewTabButton);
-    } else {
-      await this.clickOnElementWithSelector(previewTabButton);
     }
 
-    await this.page.waitForURL(url => url.href.includes('#/preview/'));
     await this.waitForPageToFullyLoad();
     await this.expectElementToBeVisible(previewTabContainer);
   }
