@@ -100,7 +100,7 @@ const mobileSaveChangesButtonSelector =
   'button.e2e-test-save-changes-for-small-screens';
 const mobilePublishButtonSelector = 'button.e2e-test-mobile-publish-button';
 const mobileDiscardButtonSelector =
-  'button.e2e-test-discard-changes-for-small-screens';
+  'button.e2e-test-mobile-exploration-discard-tab';
 const mobileNavbarDropdown = 'div.e2e-test-mobile-options-dropdown';
 const mobileNavbarOptions = '.navbar-mobile-options';
 const mobileOptionsButtonSelector = 'i.e2e-test-mobile-options';
