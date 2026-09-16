@@ -88,6 +88,7 @@ test.describe('Lesson Creator', function () {
     await explorationEditor.expectExplorationGraphToContainCard('Final');
     await explorationEditor.navigateToSettingsTab();
     await explorationEditor.selectFirstCard('Second');
+    await explorationEditor.saveExplorationDraft('Changed first card');
     await explorationEditor.reloadPage();
     await explorationEditor.navigateToPreviewTab();
     await explorationEditor.expectPreviewCardContentToBe(
