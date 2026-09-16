@@ -1961,7 +1961,6 @@ export class ExplorationEditor extends BaseUser {
     cardName: string
   ): Promise<void> {
     await this.openExplorationStateGraphInMobileView();
-    await this.expectElementToBeVisible(explorationGraphSelector);
     await this.page.waitForFunction(
       ({selector, expectedName}: {selector: string; expectedName: string}) => {
         return !Array.from(document.querySelectorAll(selector)).some(
@@ -1994,7 +1993,6 @@ export class ExplorationEditor extends BaseUser {
       await this.navigateToCard(stateName);
     }
 
-    await this.expectElementToBeVisible(explorationGraphSelector);
     await this.clickOnGraphNodeElement(
       stateName,
       explorationGraphNodeBackgroundSelector
