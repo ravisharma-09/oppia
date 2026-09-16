@@ -70,6 +70,9 @@ const saveExplorationChangesButton = 'button.e2e-test-confirm-pre-publication';
 const explorationConfirmPublishButton = '.e2e-test-confirm-publish';
 const explorationIdElement = 'span.oppia-unique-progress-id';
 const closePublishedPopUpButton = 'button.e2e-test-share-publish-close';
+const discardDraftDropdownSelector = 'button.e2e-test-save-discard-toggle';
+const desktopDiscardDraftButton = 'a.e2e-test-discard-changes';
+const confirmDiscardButton = 'button.e2e-test-confirm-discard-changes';
 
 const explorationStateGraphModalSelector =
   '.e2e-test-exploration-state-graph-modal';
@@ -86,6 +89,9 @@ const addStateInput = '.e2e-test-add-state-input';
 const saveOutcomeDestButton = '.e2e-test-save-outcome-dest';
 const stateContentSelector = '.e2e-test-actual-state-content';
 const stateContentInputField = 'div.e2e-test-rte';
+const currentOutcomeDestinationSelector = '.e2e-test-current-outcome-dest';
+const contentBoxSelector =
+  '.e2e-test-state-editor .e2e-test-state-content-display';
 
 const toastMessage = '.e2e-test-toast-message';
 
@@ -93,6 +99,8 @@ const mobileChangesDropdownSelector = 'div.e2e-test-mobile-changes-dropdown';
 const mobileSaveChangesButtonSelector =
   'button.e2e-test-save-changes-for-small-screens';
 const mobilePublishButtonSelector = 'button.e2e-test-mobile-publish-button';
+const mobileDiscardButtonSelector =
+  'button.e2e-test-discard-changes-for-small-screens';
 const mobileNavbarDropdown = 'div.e2e-test-mobile-options-dropdown';
 const mobileNavbarOptions = '.navbar-mobile-options';
 const mobileOptionsButtonSelector = 'i.e2e-test-mobile-options';
@@ -121,6 +129,9 @@ const mobileTranslationTabButton = '.e2e-test-mobile-translation-tab';
 const mainTabButton = '.e2e-test-main-tab';
 const mobileMainTabButton = '.e2e-test-mobile-main-tab';
 const mainTabContainerSelector = '.e2e-test-exploration-main-tab';
+const previewTabButton = '.e2e-test-preview-tab';
+const previewTabContainer = '.e2e-test-preview-tab-container';
+const mobilePreviewTabButton = '.e2e-test-mobile-preview-button';
 const navigationDropdownInMobileVisibleSelector =
   '.oppia-exploration-editor-tabs-dropdown.show';
 const dropdownToggleIcon = '.e2e-test-mobile-options-dropdown';
@@ -164,6 +175,18 @@ const historyTableIndex = '.e2e-test-history-table-index';
 const historyListOptions = '.e2e-test-history-table-option';
 const downloadExplorationButton =
   'a.dropdown-item.e2e-test-download-exploration';
+const stateConversationContent = '.e2e-test-conversation-content';
+const firstCardSettingsSelector = '.e2e-test-initial-state-select';
+const explorationGraphSelector = 'oppia-exploration-graph';
+const explorationGraphNodeBackgroundSelector = 'rect.e2e-test-node-background';
+const explorationGraphNodeDeleteButtonSelector =
+  'g.e2e-test-delete-node rect.oppia-node-delete';
+const explorationGraphNodeSelector = 'g.e2e-test-node';
+const stateNodeSelector = '.e2e-test-node-label';
+const confirmDeleteStateButtonSelector = '.e2e-test-confirm-delete-state';
+const closeModalButtonSelector = '.e2e-test-modal-close-button';
+const stateNameSubmitButtonSelector = 'button.e2e-test-state-name-submit';
+const stateNameInputSelector = '.e2e-test-state-name-input';
 
 const totalPlaysCardSelector = '.total-plays';
 const openFeedbackCardSelector = '.total-open-feedback';
@@ -1735,6 +1758,300 @@ export class ExplorationEditor extends BaseUser {
           `but found ${totalUsers} instead.`
       );
     }
+  }
+
+  /**
+   * Opens the exploration graph modal on mobile viewports.
+   */
+  async openExplorationStateGraphInMobileView(): Promise<void> {
+    if (!this.isViewportAtMobileWidth()) {
+      return;
+    }
+
+    const stateGraphModalIsOpen = await this.isElementVisible(
+      explorationStateGraphModalSelector
+    );
+    if (stateGraphModalIsOpen) {
+      return;
+    }
+
+    const blockingModal = await this.page.$('div.modal-content');
+    if (blockingModal) {
+      await this.expectElementToBeVisible('div.modal-content', false);
+    }
+
+    await this.expectElementToBeVisible(mobileStateGraphResizeButton);
+    await this.clickOnElementWithSelector(mobileStateGraphResizeButton);
+    await this.expectElementToBeVisible(explorationStateGraphModalSelector);
+  }
+
+  /**
+   * Discards the current exploration draft changes.
+   */
+  async discardCurrentChanges(): Promise<void> {
+    if (this.isViewportAtMobileWidth()) {
+      await this.expectElementToBeVisible(mobileChangesDropdownSelector);
+      await this.clickOnElementWithSelector(mobileChangesDropdownSelector);
+      await this.expectElementToBeVisible(
+        `${mobileDiscardButtonSelector}:not(.disabled)`
+      );
+      await this.clickOnElementWithSelector(mobileDiscardButtonSelector);
+    } else {
+      await this.expectElementToBeVisible(discardDraftDropdownSelector);
+      await this.clickOnElementWithSelector(discardDraftDropdownSelector);
+      await this.expectElementToBeVisible(
+        `${desktopDiscardDraftButton}:not(.disabled)`
+      );
+      await this.clickOnElementWithSelector(desktopDiscardDraftButton);
+    }
+
+    await this.expectElementToBeVisible(confirmDiscardButton);
+    await this.clickOnElementWithSelector(confirmDiscardButton);
+    await this.expectElementToBeVisible(confirmDiscardButton, false);
+    await this.waitForPageToFullyLoad();
+  }
+
+  /**
+   * Updates the name of the current state.
+   * @param newStateName - The new state name.
+   */
+  async updateStateName(newStateName: string): Promise<void> {
+    await this.expectElementToBeVisible(currentCardNameContainerSelector);
+    await this.clickOnElementWithSelector(currentCardNameContainerSelector);
+    await this.expectElementToBeVisible(stateNameInputSelector);
+    await this.clearAllTextFrom(stateNameInputSelector);
+    await this.typeInInputField(stateNameInputSelector, newStateName);
+    await this.clickOnElementWithSelector(stateNameSubmitButtonSelector);
+    await this.expectTextContentToContain(
+      currentCardNameContainerSelector,
+      newStateName
+    );
+  }
+
+  /**
+   * Verifies that the current state name matches the expected state name.
+   * @param expectedStateName - The expected state name.
+   */
+  async expectStateNameToBe(expectedStateName: string): Promise<void> {
+    await this.expectTextContentToContain(
+      currentCardNameContainerSelector,
+      expectedStateName
+    );
+  }
+
+  /**
+   * Verifies that the editor card content matches the expected content.
+   * @param expectedCardContent - The expected card content.
+   */
+  async expectCardContentToBe(expectedCardContent: string): Promise<void> {
+    await this.expectTextContentToBe(contentBoxSelector, expectedCardContent);
+  }
+
+  /**
+   * Verifies that the current outcome destination matches the expected value.
+   * @param expectedDestination - The expected destination.
+   */
+  async expectCurrentOutcomeDestinationToBe(
+    expectedDestination: string
+  ): Promise<void> {
+    await this.expectTextContentToBe(
+      currentOutcomeDestinationSelector,
+      expectedDestination
+    );
+  }
+
+  /**
+   * Selects the first card of the exploration.
+   * @param cardName - The card name to select as the first card.
+   */
+  async selectFirstCard(cardName: string): Promise<void> {
+    await this.expectElementToBeVisible(firstCardSettingsSelector);
+    await this.clickOnElementWithSelector(firstCardSettingsSelector);
+    await this.selectMatOption(cardName);
+  }
+
+  /**
+   * Navigates to the preview tab.
+   */
+  async navigateToPreviewTab(): Promise<void> {
+    if (this.isViewportAtMobileWidth()) {
+      const element = await this.page.$(mobileNavbarOptions);
+      if (!element) {
+        await this.expectElementToBeVisible(mobileOptionsButtonSelector);
+        await this.clickOnElementWithSelector(mobileOptionsButtonSelector);
+      }
+
+      const isDropdownOpen = await this.isElementVisible(
+        `${mobileNavbarPane}.show`
+      );
+      if (!isDropdownOpen) {
+        await this.expectElementToBeVisible(mobileNavbarDropdown);
+        await this.clickOnElementWithSelector(mobileNavbarDropdown);
+      }
+
+      await this.expectElementToBeVisible(mobilePreviewTabButton);
+      await this.clickOnElementWithSelector(mobilePreviewTabButton);
+    } else {
+      await this.expectElementToBeVisible(previewTabButton);
+      await this.clickOnElementWithSelector(previewTabButton);
+    }
+
+    await this.page.waitForURL(url => url.href.includes('#/preview/'));
+    await this.waitForPageToFullyLoad();
+    await this.expectElementToBeVisible(previewTabContainer);
+  }
+
+  /**
+   * Verifies that the preview card content matches the expected content.
+   * @param cardName - The card name being checked.
+   * @param expectedCardContent - The expected preview card content.
+   * @param matchCase - Whether the content should match.
+   */
+  async expectPreviewCardContentToBe(
+    cardName: string,
+    expectedCardContent: string,
+    matchCase: boolean = true
+  ): Promise<void> {
+    await this.expectElementToBeVisible(stateConversationContent);
+    const previewText = await this.page.$eval(
+      stateConversationContent,
+      element => (element as HTMLElement).innerText.trim().replace(/\n+/g, '\n')
+    );
+    const expectedText = expectedCardContent.trim().replace(/\n+/g, '\n');
+    const contentMatches = previewText === expectedText;
+
+    if (contentMatches !== matchCase) {
+      throw new Error(
+        `Preview card "${cardName}" content mismatch. ` +
+          `Expected "${expectedText}", found "${previewText}".`
+      );
+    }
+  }
+
+  /**
+   * Verifies that the exploration graph contains the specified card.
+   * @param cardName - The card name to check.
+   */
+  async expectExplorationGraphToContainCard(cardName: string): Promise<void> {
+    await this.openExplorationStateGraphInMobileView();
+    await this.expectElementToBeVisible(explorationGraphNodeSelector);
+    await this.page.waitForFunction(
+      ({selector, expectedName}: {selector: string; expectedName: string}) => {
+        return Array.from(document.querySelectorAll(selector)).some(
+          element => element.textContent?.trim() === expectedName
+        );
+      },
+      {selector: stateNodeSelector, expectedName: cardName},
+      {timeout: 60000}
+    );
+
+    if (this.isViewportAtMobileWidth()) {
+      await this.clickOnElementWithSelector(closeModalButtonSelector);
+      await this.expectElementToBeVisible(
+        explorationStateGraphModalSelector,
+        false
+      );
+    }
+  }
+
+  /**
+   * Verifies that the exploration graph does not contain the specified card.
+   * @param cardName - The card name to check.
+   */
+  async expectExplorationGraphToNotContainCard(
+    cardName: string
+  ): Promise<void> {
+    await this.openExplorationStateGraphInMobileView();
+    await this.expectElementToBeVisible(explorationGraphSelector);
+    await this.page.waitForFunction(
+      ({selector, expectedName}: {selector: string; expectedName: string}) => {
+        return !Array.from(document.querySelectorAll(selector)).some(
+          element => element.textContent?.trim() === expectedName
+        );
+      },
+      {selector: stateNodeSelector, expectedName: cardName},
+      {timeout: 60000}
+    );
+
+    if (this.isViewportAtMobileWidth()) {
+      await this.clickOnElementWithSelector(closeModalButtonSelector);
+      await this.expectElementToBeVisible(
+        explorationStateGraphModalSelector,
+        false
+      );
+    }
+  }
+
+  /**
+   * Deletes a state from the exploration graph.
+   * @param stateName - The state name to delete.
+   */
+  async deleteState(stateName: string): Promise<void> {
+    await this.expectExplorationGraphToContainCard(stateName);
+
+    if (this.isViewportAtMobileWidth()) {
+      await this.openExplorationStateGraphInMobileView();
+    } else {
+      await this.navigateToCard(stateName);
+    }
+
+    await this.expectElementToBeVisible(explorationGraphSelector);
+    await this.clickOnGraphNodeElement(
+      stateName,
+      explorationGraphNodeBackgroundSelector
+    );
+    const deleteClicked = await this.clickOnGraphNodeElement(
+      stateName,
+      explorationGraphNodeDeleteButtonSelector
+    );
+    if (!deleteClicked) {
+      throw new Error(`Delete button not found for card "${stateName}".`);
+    }
+
+    await this.expectElementToBeVisible(confirmDeleteStateButtonSelector);
+    await this.clickOnElementWithSelector(confirmDeleteStateButtonSelector);
+    await this.expectExplorationGraphToNotContainCard(stateName);
+  }
+
+  /**
+   * Clicks an element inside a graph node.
+   * @param stateName - The graph node state name.
+   * @param selectorToClick - The selector to click inside the node.
+   */
+  async clickOnGraphNodeElement(
+    stateName: string,
+    selectorToClick: string
+  ): Promise<boolean> {
+    return await this.page.evaluate(
+      ({
+        stateName,
+        selectorToClick,
+        graphNodeSelector,
+      }: {
+        stateName: string;
+        selectorToClick: string;
+        graphNodeSelector: string;
+      }) => {
+        const graphNodes = Array.from(
+          document.querySelectorAll(graphNodeSelector)
+        );
+        const graphNode = graphNodes.find(node =>
+          node.textContent?.includes(stateName)
+        );
+        const element = graphNode?.querySelector(selectorToClick);
+        if (!element) {
+          return false;
+        }
+        element.scrollIntoView({block: 'center', inline: 'center'});
+        element.dispatchEvent(new Event('click', {bubbles: true}));
+        return true;
+      },
+      {
+        stateName,
+        selectorToClick,
+        graphNodeSelector: explorationGraphNodeSelector,
+      }
+    );
   }
 }
 
