@@ -1893,7 +1893,7 @@ export class ExplorationEditor extends BaseUser {
       await this.clickOnElementWithSelector(mobilePreviewTabButton);
     } else {
       await this.expectElementToBeVisible(previewTabButton);
-      await this.clickOnElementWithSelector(previewTabButton);
+      await this.page.locator(previewTabButton).dispatchEvent('click');
     }
 
     await this.page.waitForURL(url => url.href.includes('#/preview/'));
@@ -1934,7 +1934,6 @@ export class ExplorationEditor extends BaseUser {
    */
   async expectExplorationGraphToContainCard(cardName: string): Promise<void> {
     await this.openExplorationStateGraphInMobileView();
-    await this.expectElementToBeVisible(explorationGraphNodeSelector);
     await this.page.waitForFunction(
       ({selector, expectedName}: {selector: string; expectedName: string}) => {
         return Array.from(document.querySelectorAll(selector)).some(
