@@ -1819,8 +1819,7 @@ export class ExplorationEditor extends BaseUser {
     await this.expectElementToBeVisible(currentCardNameContainerSelector);
     await this.clickOnElementWithSelector(currentCardNameContainerSelector);
     await this.expectElementToBeVisible(stateNameInputSelector);
-    await this.clearAllTextFrom(stateNameInputSelector);
-    await this.typeInInputField(stateNameInputSelector, newStateName);
+    await this.page.locator(stateNameInputSelector).fill(newStateName);
     await this.clickOnElementWithSelector(stateNameSubmitButtonSelector);
     await this.expectTextContentToContain(
       currentCardNameContainerSelector,
